@@ -1,0 +1,15 @@
+<Window x:Class="SaarOSS.Rechnungsprogramm.Views.LocalDataResetWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Lokale Daten zur&#x00FC;cksetzen" Width="720" Height="650" MinWidth="640" MinHeight="560" WindowStartupLocation="CenterOwner" Background="#F4F7F5">
+ <Grid Margin="24"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+  <StackPanel><TextBlock Text="Lokale Daten zur&#x00FC;cksetzen" FontSize="27" FontWeight="Bold"/><TextBlock Text="Vor jeder &#x00C4;nderung wird automatisch eine gepr&#x00FC;fte Sicherung erstellt." Foreground="#52625A" Margin="0,6,0,18"/></StackPanel>
+  <Border Grid.Row="1" Background="White" BorderBrush="#D7DFDA" BorderThickness="1" CornerRadius="10" Padding="20"><StackPanel>
+   <TextBlock Text="Was soll zur&#x00FC;ckgesetzt werden?" FontSize="18" FontWeight="SemiBold"/>
+   <CheckBox x:Name="TransactionsBox" Content="Vorgangsdaten: Kunden, E-Rechnungsdaten, Rechnungen, Angebote und Zahlungen" IsChecked="True" Margin="0,16,0,0"/>
+   <CheckBox x:Name="SettingsBox" Content="Pers&#x00F6;nliche Einstellungen: Unternehmensdaten, Logo, Briefkopf sowie Zahlungs- und Fu&#x00DF;bereich" Margin="0,10,0,0"/>
+   <CheckBox x:Name="NumberingBox" Content="Nummernkreise ebenfalls auf Standardwerte zur&#x00FC;cksetzen" Margin="0,10,0,0"/>
+   <Border Background="#FFF8E6" BorderBrush="#E3C66F" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,18,0,0"><TextBlock Text="Nummernkreise bleiben standardm&#x00E4;&#x00DF;ig erhalten. Abgeschlossene Rechnungen und Angebote werden nur nach ausdr&#x00FC;cklicher Auswahl der Vorgangsdaten entfernt." TextWrapping="Wrap"/></Border>
+   <TextBlock Text="Sicherheitsbest&#x00E4;tigung" FontWeight="SemiBold" Margin="0,18,0,5"/><TextBlock Text="Zum Freigeben exakt RESET eingeben." Foreground="#52625A"/><TextBox x:Name="ConfirmBox" Margin="0,7,0,0" TextChanged="ConfirmationChanged"/>
+   <TextBlock x:Name="StatusText" Margin="0,14,0,0" TextWrapping="Wrap" Foreground="#14532D" FontWeight="SemiBold"/>
+  </StackPanel></Border>
+  <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0"><Button Content="Abbrechen" Click="Cancel"/><Button x:Name="ResetButton" Style="{StaticResource PrimaryButton}" Content="Sichern und zur&#x00FC;cksetzen" Click="Reset" IsEnabled="False"/></StackPanel>
+ </Grid>
+</Window>

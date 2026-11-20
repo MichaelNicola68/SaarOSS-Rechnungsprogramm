@@ -1,0 +1,1 @@
+﻿namespace SaarOSS.Rechnungsprogramm.Services; public static class UpdateSecurityPolicy { public static bool IsAllowedPackageUri(Uri uri)=>uri.Scheme==Uri.UriSchemeHttps&&uri.Host.Equals("saaross.de",StringComparison.OrdinalIgnoreCase); public static bool IsAllowedChannel(string channel)=>channel is "stable" or "beta" or "alpha"; }

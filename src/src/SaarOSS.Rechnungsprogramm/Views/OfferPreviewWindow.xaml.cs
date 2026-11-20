@@ -1,0 +1,9 @@
+﻿using System.IO;using System.Windows;using SaarOSS.Rechnungsprogramm.Models;using SaarOSS.Rechnungsprogramm.Services;
+namespace SaarOSS.Rechnungsprogramm.Views;
+public partial class OfferPreviewWindow:Window
+{
+ readonly Offer _offer;public OfferPreviewWindow(Offer offer){InitializeComponent();_offer=offer;TitleText.Text=$"Vorschau {_offer.DisplayNumber}";Reader.Document=OfferDocumentService.BuildDocument(_offer);}
+ void SavePdf(object s,RoutedEventArgs e){var d=new Microsoft.Win32.SaveFileDialog{Title="Angebot als PDF speichern",Filter="PDF-Datei (*.pdf)|*.pdf",FileName=$"{Safe(_offer.DisplayNumber)}.pdf",AddExtension=true,DefaultExt=".pdf"};if(d.ShowDialog(this)!=true)return;try{OfferDocumentService.SavePdf(_offer,d.FileName);MessageBox.Show("Die Angebots-PDF wurde gespeichert.");}catch(Exception ex){MessageBox.Show(ex.Message,"PDF-Fehler",MessageBoxButton.OK,MessageBoxImage.Error);}}
+ void Print(object s,RoutedEventArgs e){var d=new System.Windows.Controls.PrintDialog();if(d.ShowDialog()!=true)return;var doc=OfferDocumentService.BuildDocument(_offer);var p=((System.Windows.Documents.IDocumentPaginatorSource)doc).DocumentPaginator;p.PageSize=new Size(d.PrintableAreaWidth,d.PrintableAreaHeight);d.PrintDocument(p,$"Angebot {_offer.DisplayNumber}");}
+ void CloseWindow(object s,RoutedEventArgs e)=>Close();static string Safe(string v)=>string.Concat(v.Select(ch=>Path.GetInvalidFileNameChars().Contains(ch)?'_':ch));void ZoomChanged(object s,RoutedPropertyChangedEventArgs<double> e){if(Reader is null||ZoomText is null)return;Reader.Zoom=e.NewValue;ZoomText.Text=$"{e.NewValue:0} %";}void ZoomIn(object s,RoutedEventArgs e)=>ZoomSlider.Value=Math.Min(250,ZoomSlider.Value+10);void ZoomOut(object s,RoutedEventArgs e)=>ZoomSlider.Value=Math.Max(50,ZoomSlider.Value-10);void ZoomReset(object s,RoutedEventArgs e)=>ZoomSlider.Value=100;void FitPage(object s,RoutedEventArgs e)=>ZoomSlider.Value=90;
+}

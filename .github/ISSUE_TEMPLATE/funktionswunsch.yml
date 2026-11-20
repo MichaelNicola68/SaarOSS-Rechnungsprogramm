@@ -1,0 +1,11 @@
+name: Funktionswunsch
+description: Verbesserung vorschlagen
+title: "[Wunsch] "
+body:
+  - type: textarea
+    id: need
+    attributes: { label: Gewünschte Verbesserung }
+    validations: { required: true }
+  - type: textarea
+    id: benefit
+    attributes: { label: Nutzen für kleine Unternehmen }

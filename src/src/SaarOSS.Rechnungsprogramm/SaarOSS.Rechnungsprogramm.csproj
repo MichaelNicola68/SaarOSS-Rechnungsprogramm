@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup>
+    <Copyright>Copyright © 2026 Michael Nicola</Copyright>
+    <PackageProjectUrl>https://saaross.de</PackageProjectUrl>
+    <Authors>Michael Nicola</Authors>
+    <Company>Michael Nicola</Company>
+    <Product>SaarOSS-Rechnungsprogramm</Product>
+    <ApplicationIcon>Assets\SaarOSS-Rechnungsprogramm.ico</ApplicationIcon><OutputType>WinExe</OutputType><TargetFramework>net10.0-windows</TargetFramework><UseWPF>true</UseWPF><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><AssemblyName>SaarOSS.Rechnungsprogramm</AssemblyName><RootNamespace>SaarOSS.Rechnungsprogramm</RootNamespace><Version>1.0.0</Version><AssemblyVersion>1.0.0.0</AssemblyVersion><FileVersion>1.0.0.0</FileVersion><ApplicationManifest>app.manifest</ApplicationManifest></PropertyGroup></Project>

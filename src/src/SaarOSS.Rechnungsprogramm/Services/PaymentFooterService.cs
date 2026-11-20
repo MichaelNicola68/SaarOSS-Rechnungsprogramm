@@ -1,0 +1,16 @@
+﻿using System.IO;using System.Text.Json;using SaarOSS.Rechnungsprogramm.Models;
+namespace SaarOSS.Rechnungsprogramm.Services;
+public sealed class PaymentFooterService
+{
+ static readonly JsonSerializerOptions Options=new(){WriteIndented=true};
+ readonly string _folder=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"SaarOSS","Rechnungsprogramm","Zahlungsbereich");
+ string ProfileFile=>Path.Combine(_folder,"payment-footer.json");string BackupFile=>Path.Combine(_folder,"payment-footer.backup.json");
+ public PaymentFooterProfile Load(){if(!File.Exists(ProfileFile))return new();try{return JsonSerializer.Deserialize<PaymentFooterProfile>(File.ReadAllText(ProfileFile),Options)??new();}catch(Exception ex){throw new InvalidDataException("Zahlungs- und Fußbereich konnte nicht gelesen werden und wurde nicht überschrieben.",ex);}}
+ public void Save(PaymentFooterProfile p){p.AccountHolder=Clean(p.AccountHolder,120);p.BankName=Clean(p.BankName,120);p.Iban=NormalizeIban(p.Iban);p.Bic=NormalizeBic(p.Bic);p.PaymentInstruction=Clean(p.PaymentInstruction,300);p.PurposeTemplate=Clean(p.PurposeTemplate,180);p.FooterLine1=Clean(p.FooterLine1,160);p.FooterLine2=Clean(p.FooterLine2,160);p.FooterLine3=Clean(p.FooterLine3,160);p.FooterLine4=Clean(p.FooterLine4,160);Validate(p);Directory.CreateDirectory(_folder);p.UpdatedAt=DateTime.Now;var temp=ProfileFile+".tmp";File.WriteAllText(temp,JsonSerializer.Serialize(p,Options));if(File.Exists(ProfileFile))File.Copy(ProfileFile,BackupFile,true);File.Move(temp,ProfileFile,true);}
+ public (bool ShowBankDetails,string AccountHolder,string BankName,string Iban,string Bic,string PaymentInstruction,string PurposeTemplate,string FooterLine1,string FooterLine2,string FooterLine3,string FooterLine4) CreateInvoiceSnapshot(){var p=Load();return(p.ShowBankDetailsOnInvoices,p.AccountHolder??"",p.BankName??"",NormalizeIban(p.Iban),p.Bic??"",p.PaymentInstruction??"",p.PurposeTemplate??"",p.FooterLine1??"",p.FooterLine2??"",p.FooterLine3??"",p.FooterLine4??"");}
+ public static string FormatIban(string iban){var s=NormalizeIban(iban);return string.Join(" ",Enumerable.Range(0,(s.Length+3)/4).Select(i=>s.Substring(i*4,Math.Min(4,s.Length-i*4))));}
+ public static string NormalizeIban(string value)=>new((value??"").Where(char.IsLetterOrDigit).Select(char.ToUpperInvariant).ToArray());
+ static string NormalizeBic(string value)=>new((value??"").Where(char.IsLetterOrDigit).Select(char.ToUpperInvariant).ToArray());
+ static string Clean(string value,int max){var s=(value??"").Trim();return s.Length<=max?s:s[..max];}
+ static void Validate(PaymentFooterProfile p){if(string.IsNullOrWhiteSpace(p.Iban)){if(p.ShowBankDetailsOnInvoices||p.ShowBankDetailsOnOffers)throw new InvalidDataException("Bitte eine IBAN eingeben oder die Anzeige der Bankverbindung deaktivieren.");return;}if(p.Iban.Length<15||p.Iban.Length>34||!char.IsLetter(p.Iban[0])||!char.IsLetter(p.Iban[1])||!char.IsDigit(p.Iban[2])||!char.IsDigit(p.Iban[3]))throw new InvalidDataException("Die IBAN ist formal nicht plausibel. Erwartet werden 15 bis 34 Zeichen mit Länderkennzeichen und Prüfziffern.");if(!string.IsNullOrWhiteSpace(p.Bic)&&(p.Bic.Length!=8&&p.Bic.Length!=11))throw new InvalidDataException("Die BIC muss leer, 8 oder 11 Zeichen lang sein.");}
+}

@@ -1,0 +1,1 @@
+﻿using System.Windows.Controls; namespace SaarOSS.Rechnungsprogramm.Views; public partial class PlaceholderView:UserControl { public PlaceholderView(string heading,string description){InitializeComponent();Heading.Text=heading;Description.Text=description;} }

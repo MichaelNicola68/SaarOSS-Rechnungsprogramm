@@ -1,0 +1,41 @@
+using System.Diagnostics;using System.IO;using System.IO.Compression;using System.Net.Http;using System.Security.Cryptography;using System.Text.Json;
+namespace SaarOSS.Rechnungsprogramm.Services;
+public sealed class UpdateZipService
+{
+ public const string InstalledVersion="1.0.0";
+ const string ManifestUrl="https://saaross.de/downloads/saaross-rechnungsprogramm/update.json";
+ static readonly Uri OfficialBase=new("https://saaross.de/");readonly HttpClient http=new(){Timeout=TimeSpan.FromMinutes(10)};
+ public string DownloadFolder=>Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),"Downloads","SaarOSS-Updates");
+ public sealed record UpdateManifest(string Version,string Published,string DownloadUrl,string Sha256,long Size,string Notes){public string SizeText=>Size>0?$"{Size/1024d/1024d:0.0} MB":"nicht angegeben";}
+ public sealed record PackageManifest(string Product,string Version,string Sha256,string? MinimumVersion);
+ public sealed record VerifiedPackage(string ZipPath,string Version,string Sha256,int FileCount,string RootFolder);
+ public async Task<UpdateManifest> GetManifestAsync(){using var r=await http.GetAsync(ManifestUrl);r.EnsureSuccessStatusCode();var json=await r.Content.ReadAsStringAsync();var m=JsonSerializer.Deserialize<UpdateManifest>(json,new JsonSerializerOptions{PropertyNameCaseInsensitive=true})??throw new InvalidDataException("Update-Manifest ist leer.");ValidateOfficialUrl(m.DownloadUrl);if(string.IsNullOrWhiteSpace(m.Version)||m.Sha256.Length!=64)throw new InvalidDataException("Update-Manifest ist unvollst\u00E4ndig.");return m;}
+ public bool IsNewer(string version)=>Compare(version,InstalledVersion)>0;
+ public async Task<string> DownloadAsync(UpdateManifest m,Action<int> progress){ValidateOfficialUrl(m.DownloadUrl);Directory.CreateDirectory(DownloadFolder);var name=Path.GetFileName(new Uri(m.DownloadUrl).LocalPath);if(string.IsNullOrWhiteSpace(name)||!name.EndsWith(".zip",StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("Downloadadresse verweist nicht auf eine ZIP-Datei.");var target=Path.Combine(DownloadFolder,name);var temp=target+".partial";using var r=await http.GetAsync(m.DownloadUrl,HttpCompletionOption.ResponseHeadersRead);r.EnsureSuccessStatusCode();var total=r.Content.Headers.ContentLength??m.Size;await using(var input=await r.Content.ReadAsStreamAsync())await using(var output=File.Create(temp)){var buffer=new byte[131072];long read=0;int n;while((n=await input.ReadAsync(buffer))>0){await output.WriteAsync(buffer.AsMemory(0,n));read+=n;if(total>0)progress((int)Math.Min(100,read*100/total));}}var hash=Hash(temp);if(!hash.Equals(m.Sha256,StringComparison.OrdinalIgnoreCase)){File.Delete(temp);throw new InvalidDataException("SHA-256 des Downloads stimmt nicht mit saaross.de \u00FCberein.");}File.Move(temp,target,true);return target;}
+ public Task<VerifiedPackage> VerifyAsync(string zip,UpdateManifest? online)=>Task.Run(()=>Verify(zip,online));
+ VerifiedPackage Verify(string zip,UpdateManifest? online){if(!File.Exists(zip)||!zip.EndsWith(".zip",StringComparison.OrdinalIgnoreCase))throw new FileNotFoundException("Update-ZIP wurde nicht gefunden.");var sha=Hash(zip);if(online is not null&&!sha.Equals(online.Sha256,StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("SHA-256 stimmt nicht mit dem Online-Manifest \u00FCberein.");using var a=ZipFile.OpenRead(zip);if(a.Entries.Count==0)throw new InvalidDataException("ZIP ist leer.");foreach(var e in a.Entries){var n=e.FullName.Replace('\\','/');if(n.StartsWith('/')||n.Contains("../",StringComparison.Ordinal)||Path.IsPathRooted(n))throw new InvalidDataException("ZIP enth\u00E4lt einen unsicheren Pfad.");}var roots=a.Entries.Select(e=>e.FullName.Replace('\\','/').Split('/')[0]).Where(x=>x.Length>0).Distinct(StringComparer.OrdinalIgnoreCase).ToList();if(roots.Count!=1)throw new InvalidDataException("Das Update-ZIP muss genau einen Hauptordner enthalten.");var entry=a.GetEntry(roots[0]+"/update-package.json")??throw new InvalidDataException("update-package.json fehlt im Hauptordner.");PackageManifest pm;using(var s=entry.Open())pm=JsonSerializer.Deserialize<PackageManifest>(s,new JsonSerializerOptions{PropertyNameCaseInsensitive=true})??throw new InvalidDataException("Paketmanifest ist ung\u00FCltig.");if(pm.Product!="SaarOSS-Rechnungsprogramm")throw new InvalidDataException("Das ZIP geh\u00F6rt nicht zum SaarOSS-Rechnungsprogramm.");if(!IsNewer(pm.Version))throw new InvalidDataException("Die Paketversion ist nicht neuer als die installierte Version.");return new(zip,pm.Version,sha,a.Entries.Count,roots[0]);}
+ public void StartExternalUpdater(VerifiedPackage p){var install=AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);var exe=Environment.ProcessPath??throw new InvalidOperationException("Programmpfad fehlt.");var work=Path.Combine(Path.GetTempPath(),"SaarOSS-Updater-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(work);var script=Path.Combine(work,"apply-update.ps1");File.WriteAllText(script,Script,new System.Text.UTF8Encoding(true));var args=$"-NoProfile -ExecutionPolicy Bypass -File \"{script}\" -Zip \"{p.ZipPath}\" -ExpectedHash \"{p.Sha256}\" -Root \"{p.RootFolder}\" -Install \"{install}\" -Exe \"{exe}\" -MainProcessId {Environment.ProcessId}";var started=Process.Start(new ProcessStartInfo("powershell.exe",args){UseShellExecute=true,WorkingDirectory=work});if(started is null)throw new InvalidOperationException("Externer Updater konnte nicht gestartet werden.");}
+ void ValidateOfficialUrl(string value){if(!Uri.TryCreate(value,UriKind.Absolute,out var u)||u.Scheme!=Uri.UriSchemeHttps||!u.Host.Equals(OfficialBase.Host,StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("Updates sind nur per HTTPS direkt von saaross.de zul\u00E4ssig.");}
+ static string Hash(string p)=>Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(p)));
+ static int Compare(string a,string b){static int[] N(string s)=>System.Text.RegularExpressions.Regex.Matches(s,"\\d+").Select(x=>int.Parse(x.Value)).ToArray();var x=N(a);var y=N(b);for(int i=0;i<Math.Max(x.Length,y.Length);i++){var c=(i<x.Length?x[i]:0).CompareTo(i<y.Length?y[i]:0);if(c!=0)return c;}return 0;}
+ const string Script=@"param([string]$Zip,[string]$ExpectedHash,[string]$Root,[string]$Install,[string]$Exe,[int]$MainProcessId)
+$ErrorActionPreference='Stop'
+$log=Join-Path $env:TEMP 'SaarOSS-Update-V1.3.log'
+try { ('Start: '+(Get-Date))|Set-Content -LiteralPath $log -Encoding UTF8
+  Wait-Process -Id $MainProcessId -Timeout 60 -ErrorAction SilentlyContinue
+  $actual=(Get-FileHash -LiteralPath $Zip -Algorithm SHA256).Hash
+  if($actual -ne $ExpectedHash){throw 'SHA-256-Pruefung fehlgeschlagen.'}
+  $stamp=Get-Date -Format 'yyyy-MM-dd-HHmmss';$backup=Join-Path (Split-Path $Install -Parent) ('SaarOSS-Programm-vor-Update-'+$stamp+'.zip')
+  Compress-Archive -Path (Join-Path $Install '*') -DestinationPath $backup -CompressionLevel Optimal
+  $temp=Join-Path $env:TEMP ('SaarOSS-Update-'+[guid]::NewGuid().ToString('N'));Expand-Archive -LiteralPath $Zip -DestinationPath $temp
+  $source=Join-Path $temp $Root;if(!(Test-Path (Join-Path $source 'SaarOSS.Rechnungsprogramm.exe'))){throw 'Neue Programm-EXE fehlt.'}
+  Get-ChildItem -LiteralPath $Install -Force|Remove-Item -Recurse -Force
+  Copy-Item -Path (Join-Path $source '*') -Destination $Install -Recurse -Force
+  $newExe=Join-Path $Install 'SaarOSS.Rechnungsprogramm.exe'
+  if(!(Test-Path -LiteralPath $newExe)){throw 'Aktualisierte Programm-EXE fehlt nach dem Kopieren.'}
+  ('Neustart: '+$newExe)|Add-Content -LiteralPath $log -Encoding UTF8
+  Start-Process -FilePath $newExe -WorkingDirectory $Install
+  Start-Sleep -Seconds 2
+  Remove-Item $temp -Recurse -Force
+} catch { ('FEHLER: '+$_.Exception.ToString())|Add-Content -LiteralPath $log -Encoding UTF8;Add-Type -AssemblyName PresentationFramework;[System.Windows.MessageBox]::Show(('Update fehlgeschlagen: '+$_.Exception.Message+'`n`nProtokoll: '+$log),'SaarOSS Update')|Out-Null;exit 1 }";
+}

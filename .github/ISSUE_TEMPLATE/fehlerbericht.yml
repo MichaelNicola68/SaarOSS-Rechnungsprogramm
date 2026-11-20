@@ -1,0 +1,23 @@
+name: Fehlerbericht
+description: Einen reproduzierbaren Fehler melden
+title: "[Fehler] "
+body:
+  - type: markdown
+    attributes:
+      value: "Keine echten oder vertraulichen Daten eintragen."
+  - type: input
+    id: version
+    attributes: { label: Programmversion }
+    validations: { required: true }
+  - type: input
+    id: windows
+    attributes: { label: Windows-Version }
+    validations: { required: true }
+  - type: textarea
+    id: steps
+    attributes: { label: Schritte zur Reproduktion }
+    validations: { required: true }
+  - type: textarea
+    id: result
+    attributes: { label: Erwartetes und tatsächliches Verhalten }
+    validations: { required: true }

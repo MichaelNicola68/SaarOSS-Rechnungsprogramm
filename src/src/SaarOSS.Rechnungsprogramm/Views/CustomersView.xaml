@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="SaarOSS.Rechnungsprogramm.Views.CustomersView" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+ <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+  <Grid Margin="0,0,0,16"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="160"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+   <TextBox x:Name="SearchBox" Height="38" VerticalContentAlignment="Center" ToolTip="Kundennummer, Name, Ort oder E-Mail durchsuchen" TextChanged="SearchChanged"/>
+   <ComboBox x:Name="FilterBox" Grid.Column="1" Height="38" Margin="12,0" SelectedIndex="0" SelectionChanged="FilterChanged"><ComboBoxItem Content="Aktive Kunden"/><ComboBoxItem Content="Alle Kunden"/><ComboBoxItem Content="Archivierte Kunden"/></ComboBox>
+   <StackPanel Grid.Column="2" Orientation="Horizontal"><Button Content="E-Rechnungsdaten" Click="OpenEInvoiceData"/><Button Style="{StaticResource PrimaryButton}" Content="+ Neuer Kunde" Click="NewCustomer" Margin="0"/></StackPanel>
+  </Grid>
+  <Grid Grid.Row="1"><Grid.ColumnDefinitions><ColumnDefinition Width="455"/><ColumnDefinition Width="18"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+   <Border Style="{StaticResource Card}" Margin="0"><Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+    <Grid Margin="0,0,0,12"><TextBlock Text="Kunden" FontSize="20" FontWeight="SemiBold"/><TextBlock x:Name="CountText" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#52625A"/></Grid>
+    <ListView x:Name="CustomerList" Grid.Row="1" SelectionChanged="CustomerSelected" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled"><ListView.View><GridView><GridViewColumn Header="Nr." Width="92" DisplayMemberBinding="{Binding CustomerNumber}"/><GridViewColumn Header="Name" Width="205" DisplayMemberBinding="{Binding DisplayName}"/><GridViewColumn Header="Ort" Width="118" DisplayMemberBinding="{Binding City}"/></GridView></ListView.View></ListView>
+   </Grid></Border>
+   <Border Grid.Column="2" Style="{StaticResource Card}" Margin="0" Padding="20,20,12,20"><ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0"><StackPanel Margin="0,0,4,0">
+    <Grid><TextBlock x:Name="FormTitle" Text="Neuer Kunde" FontSize="22" FontWeight="Bold"/><TextBlock x:Name="NumberText" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#52625A"/></Grid>
+    <TextBlock Text="Kundentyp" Margin="0,16,0,5"/><ComboBox x:Name="TypeBox" Height="36" SelectedIndex="0" SelectionChanged="TypeChanged"><ComboBoxItem Content="Unternehmen"/><ComboBoxItem Content="Privatperson"/></ComboBox>
+    <TextBlock x:Name="CompanyLabel" Text="Firmenname *" Margin="0,14,0,5"/><TextBox x:Name="CompanyBox"/>
+    <Grid x:Name="PersonGrid" Margin="0,14,0,0"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Vorname *"/><TextBox x:Name="FirstNameBox" Margin="0,5,0,0"/></StackPanel><StackPanel Grid.Column="2"><TextBlock Text="Nachname *"/><TextBox x:Name="LastNameBox" Margin="0,5,0,0"/></StackPanel></Grid>
+    <TextBlock Text="Ansprechpartner (optional)" Margin="0,14,0,5"/><TextBox x:Name="ContactBox"/>
+    <Separator Margin="0,18"/><TextBlock Text="Rechnungsanschrift" FontSize="17" FontWeight="SemiBold"/>
+    <TextBlock Text="Straße und Hausnummer *" Margin="0,12,0,5"/><TextBox x:Name="StreetBox"/>
+    <TextBlock Text="Adresszusatz (optional)" Margin="0,12,0,5"/><TextBox x:Name="ExtraBox"/>
+    <Grid Margin="0,12,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="130"/><ColumnDefinition Width="12"/><ColumnDefinition/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="PLZ *"/><TextBox x:Name="PostalBox" Margin="0,5,0,0"/></StackPanel><StackPanel Grid.Column="2"><TextBlock Text="Ort *"/><TextBox x:Name="CityBox" Margin="0,5,0,0"/></StackPanel></Grid>
+    <TextBlock Text="Land" Margin="0,12,0,5"/><TextBox x:Name="CountryBox" Text="Deutschland"/>
+    <Separator Margin="0,18"/><TextBlock Text="Kontakt und Abrechnung" FontSize="17" FontWeight="SemiBold"/>
+    <TextBlock Text="E-Mail-Adresse" Margin="0,12,0,5"/><TextBox x:Name="EmailBox"/>
+    <Grid Margin="0,12,0,0"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Telefon"/><TextBox x:Name="PhoneBox" Margin="0,5,0,0"/></StackPanel><StackPanel Grid.Column="2"><TextBlock Text="Mobil"/><TextBox x:Name="MobileBox" Margin="0,5,0,0"/></StackPanel></Grid>
+    <TextBlock Text="Umsatzsteuer-ID (optional)" Margin="0,12,0,5"/><TextBox x:Name="VatBox"/>
+    <TextBlock Text="Abweichendes Zahlungsziel in Tagen (optional)" Margin="0,12,0,5"/><TextBox x:Name="PaymentBox"/>
+    <TextBlock Text="Interne Notiz, erscheint nicht auf Rechnungen" Margin="0,12,0,5"/><TextBox x:Name="NotesBox" Height="74" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MaxLength="2000"/>
+    <StackPanel Orientation="Horizontal" Margin="0,18,0,0"><Button x:Name="SaveButton" Style="{StaticResource PrimaryButton}" Content="Kunde speichern" Click="SaveCustomer"/><Button Content="Änderungen verwerfen" Click="DiscardChanges"/><Button x:Name="ArchiveButton" Content="Kunde archivieren" Click="ToggleArchive"/></StackPanel>
+    <TextBlock x:Name="StatusText" Foreground="#14532D" FontWeight="SemiBold" Margin="0,4,0,0"/>
+   </StackPanel></ScrollViewer></Border>
+  </Grid>
+ </Grid>
+</UserControl>

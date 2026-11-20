@@ -1,0 +1,30 @@
+<UserControl x:Class="SaarOSS.Rechnungsprogramm.Views.AboutView" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+ <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel MaxWidth="820" HorizontalAlignment="Left">
+  <TextBlock Text="Über das Programm" FontSize="27" FontWeight="Bold"/>
+  <TextBlock Text="Projekt- und Supportinformationen zum SaarOSS-Rechnungsprogramm." Foreground="#52625A" Margin="0,6,0,22"/>
+  <Border Style="{StaticResource Card}"><StackPanel>
+   <TextBlock Text="SaarOSS-Rechnungsprogramm für Windows" FontSize="22" FontWeight="Bold" Foreground="#14532D"/>
+   <TextBlock Text="Version 1.0.0" FontSize="15" Margin="0,7,0,18"/>
+   <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="190"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+    <TextBlock Text="Erstellt von" FontWeight="SemiBold" Margin="0,0,0,10"/><TextBlock Grid.Column="1" Text="Michael Nicola" Margin="0,0,0,10"/>
+    <TextBlock Grid.Row="1" Text="Programmiert von" FontWeight="SemiBold" Margin="0,0,0,10"/><TextBlock Grid.Row="1" Grid.Column="1" Text="Microsoft Copilot" Margin="0,0,0,10"/>
+    <TextBlock Grid.Row="2" Text="Lizenz" FontWeight="SemiBold" Margin="0,0,0,10"/><TextBlock Grid.Row="2" Grid.Column="1" Text="GPL-3.0-or-later" Margin="0,0,0,10"/>
+    <TextBlock Grid.Row="3" Text="Updatekanal" FontWeight="SemiBold"/><TextBlock Grid.Row="3" Grid.Column="1" Text="Alpha"/>
+   </Grid>
+  </StackPanel></Border>
+  <Border Style="{StaticResource Card}"><StackPanel>
+   <TextBlock Text="Support und Projektseite" FontSize="19" FontWeight="SemiBold"/>
+   <TextBlock Text="Informationen, Dokumentation, Downloads und künftige Updates werden über SaarOSS bereitgestellt." TextWrapping="Wrap" Foreground="#52625A" Margin="0,7,0,15"/>
+   <Button Style="{StaticResource PrimaryButton}" Content="saaross.de im Browser öffnen" Click="OpenSupport" HorizontalAlignment="Left"/>
+   <TextBlock Text="https://saaross.de" Foreground="#52625A" Margin="0,2,0,0"/>
+  </StackPanel></Border>
+  <Border Style="{StaticResource Card}"><StackPanel>
+   <TextBlock Text="Freiwillige Unterstützung" FontSize="19" FontWeight="SemiBold"/>
+   <TextBlock Text="Das SaarOSS-Rechnungsprogramm wird als freie Open-Source-Software entwickelt und kostenlos bereitgestellt." TextWrapping="Wrap" Margin="0,8,0,12"/>
+   <TextBlock Text="Wenn Ihnen das Programm gefällt und Sie die weitere Entwicklung freiwillig finanziell unterstützen möchten, können Sie gerne Kontakt mit uns aufnehmen. Die Informationen zu den verfügbaren Unterstützungsmöglichkeiten erhalten Sie anschließend direkt von uns." TextWrapping="Wrap" Foreground="#52625A" Margin="0,0,0,12"/>
+   <TextBlock Text="Jede freiwillige Unterstützung hilft bei der Weiterentwicklung des Projekts." TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,15"/>
+   <Button Style="{StaticResource PrimaryButton}" Content="Kontakt aufnehmen" Click="OpenSupport" HorizontalAlignment="Left"/>
+  </StackPanel></Border>
+  <Border Background="#EFF7F2" BorderBrush="#B8D7C2" BorderThickness="1" CornerRadius="9" Padding="16"><TextBlock Text="Hinweis: Diese Projektangaben erscheinen im Programm, in der Dokumentation und im Supportbereich. Auf erstellten Rechnungen werden ausschließlich die Angaben des rechnungsstellenden Unternehmens verwendet." TextWrapping="Wrap"/></Border>
+ </StackPanel></ScrollViewer>
+</UserControl>

@@ -1,0 +1,11 @@
+﻿using System.Windows;using System.Windows.Controls;using SaarOSS.Rechnungsprogramm.Models;using SaarOSS.Rechnungsprogramm.Services;
+namespace SaarOSS.Rechnungsprogramm.Views;
+public partial class EInvoiceCustomerWindow:Window
+{
+ readonly InvoiceService _customersService=new();readonly EInvoiceCustomerSettingsService _service=new();EInvoiceCustomerSettingsStore _store=new();List<CustomerChoice> _customers=new();EInvoiceCustomerSettings? _current;
+ public EInvoiceCustomerWindow(){InitializeComponent();try{_customers=_customersService.LoadCustomers();CustomerBox.ItemsSource=_customers;_store=_service.Load();if(_customers.Count>0)CustomerBox.SelectedIndex=0;}catch(Exception ex){MessageBox.Show(ex.Message,"E-Rechnungsdaten",MessageBoxButton.OK,MessageBoxImage.Error);}}
+ void CustomerChanged(object s,SelectionChangedEventArgs e){if(CustomerBox.SelectedItem is not CustomerChoice c)return;_current=_service.GetOrCreate(_store,c.Id);CustomerNumberText.Text=$"{c.CustomerNumber} – {c.DisplayName}";Select(TypeBox,_current.CustomerType);Select(FormatBox,_current.InvoiceFormat);EmailBox.Text=_current.EInvoiceEmail;RoutingBox.Text=_current.RoutingId;BuyerReferenceBox.Text=_current.BuyerReference;DepartmentBox.Text=_current.Department;ContactBox.Text=_current.ContactPerson;StatusText.Text="";}
+ static void Select(ComboBox box,string value){foreach(var item in box.Items.OfType<ComboBoxItem>())if((item.Content?.ToString()??"")==value){box.SelectedItem=item;return;}box.SelectedIndex=0;}static string Value(ComboBox box)=>(box.SelectedItem as ComboBoxItem)?.Content?.ToString()??"";
+ void Save(object s,RoutedEventArgs e){if(_current is null){MessageBox.Show("Bitte einen Kunden auswählen.");return;}try{_current.CustomerType=Value(TypeBox);_current.InvoiceFormat=Value(FormatBox);_current.EInvoiceEmail=EmailBox.Text.Trim();_current.RoutingId=RoutingBox.Text.Trim();_current.BuyerReference=BuyerReferenceBox.Text.Trim();_current.Department=DepartmentBox.Text.Trim();_current.ContactPerson=ContactBox.Text.Trim();_service.Save(_store,_current);StatusText.Text="E-Rechnungsdaten wurden gespeichert.";}catch(Exception ex){MessageBox.Show(ex.Message,"E-Rechnungsdaten",MessageBoxButton.OK,MessageBoxImage.Warning);}}
+ void CloseWindow(object s,RoutedEventArgs e)=>Close();
+}

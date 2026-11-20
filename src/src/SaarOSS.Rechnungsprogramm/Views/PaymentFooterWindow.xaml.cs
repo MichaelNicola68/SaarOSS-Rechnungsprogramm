@@ -1,0 +1,9 @@
+﻿using System.Windows;using SaarOSS.Rechnungsprogramm.Models;using SaarOSS.Rechnungsprogramm.Services;
+namespace SaarOSS.Rechnungsprogramm.Views;
+public partial class PaymentFooterWindow:Window
+{
+ readonly PaymentFooterService _service=new();PaymentFooterProfile _profile=new();public PaymentFooterWindow(){InitializeComponent();try{_profile=_service.Load();Fill();}catch(Exception ex){MessageBox.Show(this,ex.Message,"Zahlungs- und Fußbereich",MessageBoxButton.OK,MessageBoxImage.Error);}}
+ void Fill(){InvoiceBox.IsChecked=_profile.ShowBankDetailsOnInvoices;OfferBox.IsChecked=_profile.ShowBankDetailsOnOffers;HolderBox.Text=_profile.AccountHolder;BankBox.Text=_profile.BankName;IbanBox.Text=PaymentFooterService.FormatIban(_profile.Iban);BicBox.Text=_profile.Bic;InstructionBox.Text=_profile.PaymentInstruction;PurposeBox.Text=_profile.PurposeTemplate;Footer1Box.Text=_profile.FooterLine1;Footer2Box.Text=_profile.FooterLine2;Footer3Box.Text=_profile.FooterLine3;Footer4Box.Text=_profile.FooterLine4;}
+ void Save(object s,RoutedEventArgs e){_profile.ShowBankDetailsOnInvoices=InvoiceBox.IsChecked==true;_profile.ShowBankDetailsOnOffers=OfferBox.IsChecked==true;_profile.AccountHolder=HolderBox.Text;_profile.BankName=BankBox.Text;_profile.Iban=IbanBox.Text;_profile.Bic=BicBox.Text;_profile.PaymentInstruction=InstructionBox.Text;_profile.PurposeTemplate=PurposeBox.Text;_profile.FooterLine1=Footer1Box.Text;_profile.FooterLine2=Footer2Box.Text;_profile.FooterLine3=Footer3Box.Text;_profile.FooterLine4=Footer4Box.Text;try{_service.Save(_profile);Fill();MessageBox.Show(this,"Zahlungs- und Fußbereich wurde gespeichert.","Zahlungsbereich",MessageBoxButton.OK,MessageBoxImage.Information);}catch(Exception ex){MessageBox.Show(this,ex.Message,"Speichern fehlgeschlagen",MessageBoxButton.OK,MessageBoxImage.Warning);}}
+ void CloseWindow(object s,RoutedEventArgs e)=>Close();
+}
