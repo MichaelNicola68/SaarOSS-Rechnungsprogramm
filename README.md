@@ -23,3 +23,10 @@ Erstellt von Michael Nicola. Programmiert mit Microsoft Copilot. Website und Sup
 
 ## Lizenz
 GNU General Public License Version 3 oder später. Siehe `LICENSE`.
+
+Bilder ->
+
+<img width="1465" height="919" alt="SaarOSS-Rechnungsprogramm 1 0" src="https://github.com/user-attachments/assets/9598e674-8a42-4b80-9d79-a4986829ec66" />
+<img width="1246" height="1392" alt="SaarOSS-Rechnungsprogramm 1 0 -01" src="https://github.com/user-attachments/assets/d336cd88-bb45-44b1-80e2-2eb90e7836f6" />
+<img width="1932" height="1392" alt="SaarOSS-Rechnungsprogramm 1 0 -02" src="https://github.com/user-attachments/assets/f69c5393-8293-481b-956d-c25feb16f6ef" />
+
